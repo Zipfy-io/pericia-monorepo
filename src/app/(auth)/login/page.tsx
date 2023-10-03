@@ -1,144 +1,147 @@
 "use client";
+import {
+  Auth,
+  AuthActionEnum,
+  AuthContext,
+  AuthContextValue,
+  AuthFormContainer,
+  AuthFormContainerProps,
+  AuthFormDivider,
+  AuthFormDividerProps,
+  AuthFormOptions,
+  AuthFormSuccess,
+  AuthFormSuccessProps,
+  AuthFormTitle,
+  AuthFunction,
+  AuthOptions,
+  AuthParams,
+  AuthProps,
+  AuthProvider,
+  AuthProviderProps,
+  AuthStateChangeCallback,
+  AuthToken,
+  AuthTypeEnum,
+  AuthViewOptions,
+  AvailableProviders,
+  DefaultUser,
+  ExtraAuthOptions,
+  ForgotPasswordForm,
+  ForgotPasswordFormProps,
+  ForgotPasswordView,
+  ForgotPasswordViewProps,
+  LoginButton,
+  LoginView,
+  MagicLinkForm,
+  MagicLinkFormProps,
+  OtpForm,
+  OtpFormProps,
+  OtpView,
+  PasswordForm,
+  PasswordFormProps,
+  Provider,
+  ProviderButton,
+  Providers,
+  ProvidersProps,
+  SignupView,
+  UpdatePasswordForm,
+  UpdatePasswordFormProps,
+  UpdatePasswordView,
+  UpdatePasswordViewProps,
+  UseLoginProps,
+  User,
+  VIEWS,
+  useAuth,
+  useCurrentUser,
+  useLogin,
+  useOtp,
+  useResetPassword,
+  useSignUp,
+  useUpdatePassword,
+} from "@saas-ui/auth";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { FaGoogle } from "react-icons/fa";
+import Logo from "@/components/ui/icons/Logo";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { Toaster, toast } from "react-hot-toast";
-import { signIn, useSession } from "next-auth/react";
+const svgProps = {
+  fill1: "#8952e0",
+  fill2: "#8952e0",
+  width: "100",
+  height: "100",
+  viewBox: "0 0 180 180",
+  // Add any other SVG props you want to change here
+};
 
-import { Button } from "@/components/ui/button";
-import { Input, InputProps } from "@/components/ui/input";
-import Image from "next/image";
-import googleIcon from "../../../../public/icons/google.png";
-
-const Page = () => {
-  const [isLoading, setisLoading] = React.useState(false);
-  const [isGoogleLoading, setisGoogleLoading] = React.useState(false);
-  const router = useRouter();
-
-  const { data } = useSession();
-
-  if (data?.user) {
-    router.push("/profile");
-  }
-
-  const {
-    register,
-    handleSubmit,
-
-    watch,
-    formState: { errors },
-  } = useForm();
-
-  const [buttonEnabled, setButtonEnabled] = React.useState(false);
-
-  const onLogin = async () => {
-    try {
-      console.log("onLogin");
-
-      setisLoading(true);
-
-      const data = {
-        email: watch("Email"),
-        password: watch("Password"),
-      };
-
-      const res = await signIn("credentials", {
-        redirect: true,
-        callbackUrl: "http://localhost:3000/profile",
-        ...data,
-      });
-
-      // const res = await axios.post("/api/user/login", data);
-      console.log("ee", res);
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        // toast.success("Login Success");
-      }
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error.response.data.error);
-    } finally {
-      setisLoading(false);
-    }
-  };
-
-  const onGoogleLogin = async () => {
-    try {
-      setisGoogleLoading(true);
-      const res = await signIn("google", {
-        redirect: true,
-        callbackUrl: "http://localhost:3000/profile",
-      });
-
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        toast.success("Login Success");
-        router.replace("/profile");
-      }
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error.response.data.error);
-    } finally {
-      setisGoogleLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (watch("Email") && watch("Password")) {
-      setButtonEnabled(true);
-    } else {
-      setButtonEnabled(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watch("username"), watch("Email"), watch("Password")]);
-
+export default function AuthForm() {
   return (
-    <div className="flex min-h-screen   flex-col gap-4  items-center justify-center  ">
-      <div className="flex flex-col  p-10  gap-2">
-        <label className="label">Email</label>
-        <Input
-          {...register("Email", { required: true })}
-          className="input input-bordered w-full max-w-xs"
-          placeholder="Email"
-        />
-        {errors.Email && <p className="error">Email is required.</p>}
-        <label className="label">Password</label>
-        <Input
-          type="password"
-          {...register("Password", { required: true })}
-          placeholder="Password"
-          className="input input-bordered w-full max-w-xs"
-        />
-        {errors.Password && <p className="error">Password is required.</p>}
-
-        <Button className={`  mt-3 flex gap-3 `} onClick={onLogin}>
-          {isLoading && <span className="loading loading-spinner"></span>}
-          Login
-        </Button>
-        <p className="w-full text-center">Or</p>
-        <div className="w-full items-center justify-center ">
-          <Button onClick={onGoogleLogin} className="w-full flex gap-3">
-            <Image width={25} height={25} src={googleIcon} alt="googleicon" />
-            Continue with google
-          </Button>
+    <>
+      <div className="flex flex-col justify-center flex-1 min-h-full px-6 py-12 lg:px-8">
+        <div className="justify-center w-full mx-auto align-middle sm:mx-auto sm:w-full sm:max-w-sm">
+          {/*add border color here */}
+          <div className="flex items-center justify-center w-full h-full">
+            <Logo {...svgProps} />
+          </div>
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-center text-gray-900">
+            Entre na sua conta
+          </h2>
         </div>
 
-        <div className="mt-4 items-center justify-between flex w-full">
-          <p>
-            Dont have any account ?{" "}
-            <Link href={"/signup"} className="link link-primary">
-              Create account
-            </Link>
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <AuthFormContainer>
+            <LoginView
+              action={"logIn"}
+              title={""}
+              noAccount={"Não tem uma conta?"}
+              signupLink={"Cadastre-se"}
+              providers={{
+                google: {
+                  icon: FaGoogle,
+                  name: "Google",
+                  title: "Entrar com Google",
+                },
+              }}
+              providerLabel="Entrar com"
+              dividerLabel="Ou entre com"
+              style={{
+                width: "100%",
+                borderRadius: "8px",
+                padding: "16px",
+                color: "#161E2E",
+              }}
+              submitLabel="Entrar"
+              onSuccess={() => (
+                <AuthFormSuccess
+                  title="Bem vindo de volta!"
+                  description="Você está conectado."
+                />
+              )}
+              renderSuccess={(props) => (
+                <AuthFormSuccess
+                  title="Bem vindo de volta!"
+                  description="Você está conectado."
+                  {...props}
+                />
+              )}
+              footer={
+                <p className="mt-10 text-sm text-center text-gray-500">
+                  Ainda não é membro?{" "}
+                  <a
+                    href="/signup"
+                    className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+                  >
+                    Cadastre-se
+                  </a>
+                </p>
+              }
+            />
+          </AuthFormContainer>
+
+          <p className="mt-5 text-sm text-center text-gray-500">
+            © Entrando na plataforma eu concordo que li e aceito a política de
+            cookies e privacidade.
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
-};
-
-export default Page;
+}

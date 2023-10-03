@@ -1,49 +1,27 @@
-import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse } from "next/server";
 
-export default withAuth(
-  function middleware(request: NextRequestWithAuth) {
-    console.log("Middleware Pathname:", request.nextUrl.pathname);
-    console.log("Middleware Token:", request.nextauth.token);
+export async function middleware(req: any) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
 
-    if (
-      request.nextUrl.pathname.startsWith("/admin") &&
-      request.nextauth.token?.role !== "admin"
-    ) {
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    // // IF USER IS ALREADY SUBSCRIBED THEN DONT SHOW PRICING PAGE
-    // if (
-    //   request.nextUrl.pathname.startsWith("/subscription") &&
-    //   request.nextauth.token?.isActiveSubscription
-    // ) {
-    //   return NextResponse.rewrite(new URL("/profile", request.url));
-    // }
-
-    // // IF USER IS NOT SUBSCRIBED THEN DONT SHOW PROFILE PAGE
-    // if (
-    //   request.nextUrl.pathname.startsWith("/profile") &&
-    //   !request.nextauth.token?.isActiveSubscription
-    // ) {
-    //   return NextResponse.rewrite(new URL("/subscription", request.url));
-    // }
-
-    if (
-      request.nextUrl.pathname.startsWith("/moderation") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "moderator"
-    ) {
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
+  // if user is signed in and the current path is / redirect the user to /account
+  if (user && req.nextUrl.pathname === "/") {
+    return NextResponse.redirect(new URL("/account", req.url));
   }
-);
+
+  // if user is not signed in and the current path is not / redirect the user to /
+  if (!user && req.nextUrl.pathname !== "/") {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  return res;
+}
 
 export const config = {
-  matcher: ["/admin", "/moderation", "/subscription", "/profile"],
+  matcher: ["/", "/account"],
 };

@@ -1,126 +1,70 @@
 "use client";
+import { SignupView } from "@saas-ui/auth";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import React, { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input, InputProps } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { Toaster, toast } from "react-hot-toast";
+import { FaGoogle } from "react-icons/fa";
+import Logo from "@/components/ui/icons/Logo";
 
-const Page = () => {
-  const [isLoading, setisLoading] = React.useState(false);
-
-  const router = useRouter();
-  const {
-    register,
-    handleSubmit,
-
-    watch,
-    formState: { errors },
-  } = useForm();
-
-  const [buttonEnabled, setButtonEnabled] = React.useState(false);
-
-  const onSignup = async () => {
-    try {
-      console.log("onSignup");
-
-      const data = {
-        name: watch("fullName"),
-        email: watch("Email"),
-        password: watch("Password"),
-      };
-
-      console.log(data);
-
-      if (!watch("Password") || !watch("Email") || !watch("fullName")) {
-        toast.error("Please fill all the fields");
-        return;
-      }
-
-      setisLoading(true);
-
-      const res = await axios.post("/api/user/signup", data);
-
-      console.log(res.data);
-
-      if (res.data.success) {
-        toast.success(res.data.message);
-        router.push("/login");
-      } else {
-        console.log(res.data.message);
-      }
-    } catch (error: any) {
-      console.log(error.response.data.error);
-      toast.error(error.response.data.error || error.message);
-    } finally {
-      setisLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (watch("username") && watch("Email") && watch("Password")) {
-      setButtonEnabled(true);
-    } else {
-      setButtonEnabled(false);
-    }
-  }, [watch("username"), watch("Email"), watch("Password")]);
-
+const svgProps = {
+  fill1: "#8952e0",
+  fill2: "#8952e0",
+  width: "100",
+  height: "100",
+  viewBox: "0 0 160 180",
+  // Add any other SVG props you want to change here
+};
+export default function AuthForm() {
   return (
-    <div className="flex min-h-screen  flex-col gap-4  items-center justify-center  ">
-      <Toaster position="top-center" reverseOrder={true} />
-      <div className="flex form-control w-full max-w-xs flex-col gap-2">
-        <label className="label">Full name</label>
-        <Input
-          {...register("fullName", { required: true })}
-          placeholder="Full name"
-          className="input input-bordered w-full max-w-xs"
-        />
-        {errors.fullName && <p className="error">Full name is required.</p>}
-        <label className="label">Email</label>
-        <Input
-          {...register("Email", { required: true })}
-          className="input input-bordered w-full max-w-xs"
-          placeholder="Email"
-        />
-        {errors.Email && <p className="error">Email is required.</p>}
-        <label className="label">Password</label>
-        <Input
-          {...register("Password", { required: true })}
-          onKeyUp={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit(onSignup)();
+    <>
+      <div className="flex flex-col justify-center flex-1 min-h-full px-6 py-12 lg:px-8">
+        <div className="justify-center w-full mx-auto align-middle sm:mx-auto sm:w-full sm:max-w-sm">
+          {/*add border color here */}
+          <div className="flex items-center justify-center w-full h-full">
+            <Logo {...svgProps} />
+          </div>
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-center text-gray-900">
+            Cadastre-se
+          </h2>
+        </div>
+
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <SignupView
+            title={""}
+            noAccount={"Não tem uma conta?"}
+            signupLink={"Cadastre-se"}
+            providers={{
+              google: {
+                icon: FaGoogle,
+                name: "Google",
+                title: "Cadastre-se com Google",
+              },
+            }}
+            providerLabel="Cadastre-se com"
+            dividerLabel="Ou cadastre-se com"
+            style={{
+              width: "100%",
+              borderRadius: "8px",
+              padding: "16px",
+              color: "#161E2E",
+            }}
+            submitLabel="Cadastre-se"
+            footer={
+              <p className="mt-10 text-sm text-center text-gray-500">
+                Ainda não é membro?{" "}
+                <a
+                  href="/login"
+                  className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+                >
+                  Entrar
+                </a>
+              </p>
             }
-          }}
-          placeholder="Password"
-          className="input input-bordered w-full max-w-xs"
-        />
-        {errors.Password && <p className="error">Password is required.</p>}
-
-        <Button
-          className={` ${buttonEnabled ? "btn" : "btn btn-disabled"} mt-4`}
-          onClick={onSignup}
-          type="submit"
-        >
-          {/* {isLoading && (
-            <span className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></span>
-          )} */}
-          Signup
-        </Button>
-
-        <div className="mt-4 items-center justify-between flex w-full">
-          <p>
-            Already have an account ?{" "}
-            <Link href={"/login"} className="link link-primary">
-              Login
-            </Link>
+          />
+          <p className="mt-5 text-sm text-center text-gray-500">
+            © Entrando na plataforma eu concordo que li e aceito a política de
+            cookies e privacidade.
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
-};
-
-export default Page;
+}

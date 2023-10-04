@@ -1,18 +1,28 @@
 "use client";
-import { SignupView } from "@saas-ui/auth";
+import { AuthFormSuccess, SignupView } from "@saas-ui/auth";
 
 import { FaGoogle } from "react-icons/fa";
 import Logo from "@/components/ui/icons/Logo";
+import { svgProps } from "../config/svg/LogoProps";
 
-const svgProps = {
-  fill1: "#8952e0",
-  fill2: "#8952e0",
-  width: "100",
-  height: "100",
-  viewBox: "0 0 160 180",
-  // Add any other SVG props you want to change here
-};
+import { useRouter } from "next/navigation";
+import React from "react";
+
 export default function AuthForm() {
+  const router = useRouter();
+
+  const [time, setTime] = React.useState(3);
+
+  const redirectOnSuccess = () => {
+    setTimeout(() => {
+      router.push("/verifymail");
+    }, 3000);
+
+    setInterval(() => {
+      setTime((time) => time - 1);
+    }, 1000);
+  };
+
   return (
     <>
       <div className="flex flex-col justify-center flex-1 min-h-full px-6 py-12 lg:px-8">
@@ -47,15 +57,26 @@ export default function AuthForm() {
               color: "#161E2E",
             }}
             submitLabel="Cadastre-se"
+            onSuccess={() => {
+              console.log("success");
+              redirectOnSuccess();
+            }}
+            renderSuccess={(props) => (
+              <AuthFormSuccess
+                title="Parabéns! Você está quase lá 🎉"
+                description={`Verifique seu email para finalizar seu cadastro. -> ${time}s`}
+                {...props}
+              />
+            )}
             footer={
               <p className="mt-10 text-sm text-center text-gray-500">
                 Ainda não é membro?{" "}
-                <a
-                  href="/login"
+                <button
+                  onClick={() => router.push("/login")}
                   className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
                 >
                   Entrar
-                </a>
+                </button>
               </p>
             }
           />

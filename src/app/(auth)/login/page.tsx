@@ -1,78 +1,51 @@
 "use client";
 import {
-  Auth,
-  AuthActionEnum,
-  AuthContext,
-  AuthContextValue,
   AuthFormContainer,
-  AuthFormContainerProps,
-  AuthFormDivider,
-  AuthFormDividerProps,
-  AuthFormOptions,
   AuthFormSuccess,
-  AuthFormSuccessProps,
-  AuthFormTitle,
-  AuthFunction,
-  AuthOptions,
-  AuthParams,
-  AuthProps,
-  AuthProvider,
-  AuthProviderProps,
-  AuthStateChangeCallback,
-  AuthToken,
-  AuthTypeEnum,
-  AuthViewOptions,
-  AvailableProviders,
-  DefaultUser,
-  ExtraAuthOptions,
-  ForgotPasswordForm,
-  ForgotPasswordFormProps,
-  ForgotPasswordView,
-  ForgotPasswordViewProps,
-  LoginButton,
   LoginView,
-  MagicLinkForm,
-  MagicLinkFormProps,
-  OtpForm,
-  OtpFormProps,
-  OtpView,
-  PasswordForm,
-  PasswordFormProps,
-  Provider,
-  ProviderButton,
-  Providers,
-  ProvidersProps,
-  SignupView,
-  UpdatePasswordForm,
-  UpdatePasswordFormProps,
-  UpdatePasswordView,
-  UpdatePasswordViewProps,
-  UseLoginProps,
-  User,
-  VIEWS,
-  useAuth,
-  useCurrentUser,
   useLogin,
-  useOtp,
-  useResetPassword,
-  useSignUp,
-  useUpdatePassword,
 } from "@saas-ui/auth";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { FaGoogle } from "react-icons/fa";
 import Logo from "@/components/ui/icons/Logo";
+import { svgProps } from "../config/svg/LogoProps";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import React from "react";
 
-const svgProps = {
-  fill1: "#8952e0",
-  fill2: "#8952e0",
-  width: "100",
-  height: "100",
-  viewBox: "0 0 180 180",
-  // Add any other SVG props you want to change here
+const schema = z.object({
+  email: z
+    .string()
+    .email("Por favor, insira um email válido.")
+    .min(5, "O campo de email não pode estar vazio.")
+    .nonempty("O campo de email não pode estar vazio.")
+    .refine((emailValue) => {
+      formObj.email = emailValue;
+      console.log(formObj);
+      return true; // Return true to indicate validation passed, or you can add your own logic here
+    }),
+});
+
+const formObj = {
+  email: "",
 };
 
 export default function AuthForm() {
+  const [{ data, error, isLoading }, login] = useLogin();
+
+  React.useEffect(() => {
+    if (data) {
+      console.log(data);
+    }
+    if (error) {
+      console.log(error);
+    }
+
+    if (isLoading) {
+      console.log(isLoading);
+    }
+  }, [data, error, isLoading]);
+
   return (
     <>
       <div className="flex flex-col justify-center flex-1 min-h-full px-6 py-12 lg:px-8">
@@ -87,9 +60,17 @@ export default function AuthForm() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <AuthFormContainer>
+          <AuthFormContainer
+            onSubmit={() => {
+              login(formObj);
+            }}
+          >
             <LoginView
               action={"logIn"}
+              resolver={zodResolver(schema)}
+              defaultValue={""}
+              name={"email"}
+              type="magiclink"
               title={""}
               noAccount={"Não tem uma conta?"}
               signupLink={"Cadastre-se"}
